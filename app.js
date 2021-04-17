@@ -31,7 +31,8 @@ mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema({
     email: String,
-    password: String
+    password: String,
+    googleId: String,
 });
 
 userSchema.plugin(passportMongoose);
@@ -99,7 +100,7 @@ app.get("/register", function(req, res){
 app.get("/secrets", function(req, res){
     if(req.isAuthenticated()){
         res.render("secrets")
-        console.log("checkout the secrets")
+        //console.log("checkout the secrets")
      }
      else{
         res.redirect("/login")
