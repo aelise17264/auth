@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
     email: String,
     password: String,
     googleId: String,
+    secret: String
 });
 
 userSchema.plugin(passportMongoose);
@@ -41,6 +42,8 @@ userSchema.plugin(findOrCreate)
 //userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ['password']});
 
 const User = new mongoose.model("User", userSchema);
+
+passport.use(User.createStrategy())
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
@@ -52,16 +55,17 @@ passport.deserializeUser(function(id, done) {
     });
 });
 
-  passport.use(new GoogleStrategy({
+passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
     userProfileURL: "https://www.googleapis.com/oath2/v3/userinfo",
-    passReqToCallback   : true
+   // passReqToCallback   : true
   },
-  function(request, accessToken, refreshToken, profile, done) {
+  function(accessToken, refreshToken, profile, cb) {
+
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return done(err, user);
+      return cb(err, user);
     });
   }
 ));
@@ -80,7 +84,6 @@ app.get("/auth/google",
 app.get("/auth/google/secrets",
     passport.authenticate("google", {failureRedirect: '/login'}),
     function(req, res){
-
         res.redirect('/secrets')
     }
 )
@@ -98,16 +101,43 @@ app.get("/register", function(req, res){
 
 //renders secrets page
 app.get("/secrets", function(req, res){
+    User.find({"secret": {$ne: null}}, function(err, foundUsers){
+        
+        if(err){
+            console.log(err)
+        }else{
+            if(foundUsers){
+                res.render("secrets", {usersWithSecrets: foundUsers})
+            }
+        }
+    })
+
+})
+
+app.get("/submit", function(req, res){
     if(req.isAuthenticated()){
-        res.render("secrets")
-        //console.log("checkout the secrets")
-     }
-     else{
+        res.render("submit")
+     }else{
         res.redirect("/login")
-        console.log("something isn't right")
     }
 })
 
+app.post("/submit", function(req, res){
+    const submittedSecret = req.body.secret;
+
+    User.findById(req.user.id, function(err, foundUser){
+      if (err) {
+        console.log(err);
+      } else {
+        if (foundUser) {
+          foundUser.secret = submittedSecret;
+          foundUser.save(function(){
+            res.redirect("/secrets");
+          });
+        }
+      }
+    });
+  });
 
 app.get("/logout", function(req, res){
     req.logout()
@@ -204,3 +234,12 @@ app.listen(3000, function(){
     //         }
     //     })
 //    })
+
+
+    // if(req.isAuthenticated()){
+    //     res.render("secrets")
+    //     //console.log("checkout the secrets")
+    // }else{
+    //     res.redirect("/login")
+    //     console.log("something isn't right")
+    // }
