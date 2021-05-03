@@ -27,6 +27,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.get("/", function(req, res){
+    res.render("home")
+})
+
 mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.set("useCreateIndex", true);
 
@@ -73,9 +77,7 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-app.get("/", function(req, res){
-    res.render("home")
-})
+
 
 //login/register using Google OAuth
 app.get("/auth/google",
