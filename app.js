@@ -30,8 +30,8 @@ app.use(passport.session());
 app.get("/", function(req, res){
     res.render("home")
 })
-//"mongodb://localhost:27017/userDB"
-mongoose.connect(process.env.MONGODB_CONNECT, {useNewUrlParser: true, useUnifiedTopology: true});
+
+mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema({
