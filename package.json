@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/aelise17264/auth/issues"
   },
-  "homepage": "https://github.com/aelise17264/auth#readme",
+  "homepage": "https://github.com/aelise17264/auth",
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
